@@ -88,7 +88,7 @@ const isDoneEvolving = (currentIteration: number, currentBestSolution: MaybeOrga
 const createOrganismFromDna = (dna: Dna): Organism => {
     return {
         dna,
-        score: 0
+        score: Number.MAX_SAFE_INTEGER
     };
 };
 
@@ -123,26 +123,31 @@ const generateNextGeneration = (population: Population): Population => {
 
 
 ////////
-
 // Hello World
-// 11 characters.. a-z, A-Z, " " .. 53 total characters
-const HELLO_WORLD_ASCII: Array<number> = [72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100];
+
+
+const TARGET_STRING: string = 'Hello World';
+const HELLO_WORLD_ASCII: Array<number> = TARGET_STRING.split('').map((char: string) => {
+    return char.charCodeAt(0);
+});
+const CROSSOVER_SPLIT_INDEX = Math.floor(TARGET_STRING.length/2);
 
 const generateRandomOrganism = (): Organism => {
     const randDna: Dna = [];
 
-    for (let i = 0; i < 11; ++i) {
+    for (let i = 0; i < TARGET_STRING.length; ++i) {
         randDna.push(getAsciiCodeForRandomCharacter());
     }
 
     return {
         dna: randDna,
-        score: 0
+        score: Number.MAX_SAFE_INTEGER
     };
 };
 const getAsciiCodeForRandomCharacter = (): number => {
     const randNum: number = Math.floor(Math.random() * 53);
 
+    // a-z, A-Z, " " .. 53 total characters
     if (randNum === 0) {
         return 32;              // space
     } else if (randNum <= 26) {
@@ -164,21 +169,21 @@ const crossoverDnas = (dna1: Dna, dna2: Dna): Dna => {
     let parent2DnaPart: Dna;
 
     if (Math.random() < 0.5) {
-        parent1DnaPart = dna1.slice(0, 5);
-        parent2DnaPart = dna2.slice(5);
+        parent1DnaPart = dna1.slice(0, CROSSOVER_SPLIT_INDEX);
+        parent2DnaPart = dna2.slice(CROSSOVER_SPLIT_INDEX);
     } else {
-        parent1DnaPart = dna2.slice(0, 5);
-        parent2DnaPart = dna1.slice(5);
+        parent1DnaPart = dna2.slice(0, CROSSOVER_SPLIT_INDEX);
+        parent2DnaPart = dna1.slice(CROSSOVER_SPLIT_INDEX);
     }
 
     return parent1DnaPart.concat(parent2DnaPart);
 };
 
 const mutateDna = (dna: Dna): Dna => {
-    const randomIndex: number = Math.floor(Math.random() * HELLO_WORLD_ASCII.length);
+    const randomIndex: number = Math.floor(Math.random() * TARGET_STRING.length);
     const randomAsciiCode: number = getAsciiCodeForRandomCharacter();
 
-    if (randomIndex === HELLO_WORLD_ASCII.length - 1) {
+    if (randomIndex === TARGET_STRING.length - 1) {
         return dna
                 .slice(0, randomIndex)
                 .concat(randomAsciiCode);
