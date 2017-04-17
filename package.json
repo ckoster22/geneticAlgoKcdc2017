@@ -1,0 +1,20 @@
+{
+  "name": "geneticalgokcdc2017",
+  "scripts": {
+    "build": "babel src/ -d build/",
+    "prepublish": "npm run build",
+    "start": "npm run build && node build/app.js"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2016": "^6.24.1",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.44.0"
+  },
+  "dependencies": {
+    "clear": "0.0.1",
+    "sleep": "^5.1.1"
+  }
+}
