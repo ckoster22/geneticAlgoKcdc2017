@@ -160,8 +160,8 @@ const scoreOrganism = (organism: Organism): number => {
 };
 
 const crossoverDnas = (dna1: Dna, dna2: Dna): Dna => {
-    let parent1DnaPart: Array<number>;
-    let parent2DnaPart: Array<number>;
+    let parent1DnaPart: Dna;
+    let parent2DnaPart: Dna;
 
     if (Math.random() < 0.5) {
         parent1DnaPart = dna1.slice(0, 5);
@@ -175,7 +175,7 @@ const crossoverDnas = (dna1: Dna, dna2: Dna): Dna => {
 };
 
 const mutateDna = (dna: Dna): Dna => {
-    const randomIndex:number = Math.floor(Math.random() * HELLO_WORLD_ASCII.length);
+    const randomIndex: number = Math.floor(Math.random() * HELLO_WORLD_ASCII.length);
     const randomAsciiCode: number = getAsciiCodeForRandomCharacter();
 
     if (randomIndex === HELLO_WORLD_ASCII.length - 1) {
