@@ -2,8 +2,8 @@
   "name": "geneticalgokcdc2017",
   "scripts": {
     "build": "babel src/ -d build/",
-    "prepublish": "npm run build",
-    "start": "npm run build && node build/app.js"
+    "hello": "npm run build && node build/helloWorld/hello.world.js",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
