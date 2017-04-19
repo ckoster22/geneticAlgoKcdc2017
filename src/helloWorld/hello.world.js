@@ -1,15 +1,9 @@
 // @flow
 
 import { evolveSolution } from '../genetic.algo';
-import type { GAOptions } from '../genetic.algo';
+import type { GAOptions, Organism } from '../genetic.algo';
 
 type Dna = Array<number>;
-type Organism = {
-    dna: Dna,
-    score: number
-};
-type MaybeOrganism = Organism | null;
-type Population = Array<Organism>;
 
 const TARGET_STRING: string = 'Hello World';
 const HELLO_WORLD_ASCII: Array<number> = TARGET_STRING.split('').map((char: string) => {
@@ -17,7 +11,7 @@ const HELLO_WORLD_ASCII: Array<number> = TARGET_STRING.split('').map((char: stri
 });
 const CROSSOVER_SPLIT_INDEX = Math.floor(TARGET_STRING.length/2);
 
-const generateRandomOrganism = (): Organism => {
+const generateRandomOrganism = (): Organism<Dna> => {
     const randDna: Dna = [];
 
     for (let i = 0; i < TARGET_STRING.length; ++i) {
@@ -42,7 +36,7 @@ const getAsciiCodeForRandomCharacter = (): number => {
     }
 };
 
-const scoreOrganism = (organism: Organism): number => {
+const scoreOrganism = (organism: Organism<Dna>): number => {
     return HELLO_WORLD_ASCII.reduce((score: number, asciiCode: number, index: number) => {
         const organismAscii = organism.dna[index];
         return score + Math.abs(organismAscii - asciiCode);

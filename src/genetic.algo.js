@@ -8,7 +8,7 @@ const HALF_POPULATION_SIZE = POPULATION_SIZE / 2;
 const MAX_ITERATIONS = 1000;
 const ACCEPTABLE_SCORE = 0;
 
-type Organism<DnaType> = {
+export type Organism<DnaType> = {
     dna: DnaType,
     score: number
 };
