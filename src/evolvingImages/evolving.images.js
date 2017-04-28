@@ -16,10 +16,12 @@ type Dna = Array<Circle>;
 
 const WIDTH: number = 640;
 const HEIGHT: number = 480;
-const RADIUS: number = 200;
+let RADIUS: number = 200;
 const CROSSOVER_RATE: number = 0.3;
 const MUTATION_RATE: number = 0.03;
-const NEW_CIRCLE_THRESHOLD = 0.02;
+let NEW_CIRCLE_THRESHOLD = 0.99;
+
+let generation: number = 0;
 
 // frown at any type.. TODO fix if time
 let gaCanvas: any;
@@ -97,7 +99,7 @@ const crossoverDnas = (dna1: Dna, dna2: Dna): Dna => {
 };
 
 const mutateDna = (dna: Dna): Dna => {
-    if (Math.random() <= NEW_CIRCLE_THRESHOLD) {
+    if (Math.random() >= NEW_CIRCLE_THRESHOLD) {
         console.log('generated new circle!');
         const nextDna = dna.slice();
         nextDna.push(getRandomCircle());
@@ -202,12 +204,26 @@ const mutateValue = (current: number, min: number, max: number): number => {
     return newVal;
 }
 
+const genCB = () => {
+    generation++;
+
+    if (generation % 100 === 0) {
+        NEW_CIRCLE_THRESHOLD *= 0.995;
+        console.log('more likely circles %o', NEW_CIRCLE_THRESHOLD);
+    }
+
+    if (generation % 35 === 0) {
+        RADIUS *= 0.98;
+        console.log('smaller circles %o', RADIUS);
+    }
+}
 
 const args: GAOptions<Dna> = {
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
-    mutateDna
+    mutateDna,
+    genCB
 };
 
 window.start(function(newValue) {
