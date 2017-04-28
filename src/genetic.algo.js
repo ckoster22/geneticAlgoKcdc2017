@@ -1,11 +1,8 @@
 // @flow
 
-import clear from 'clear';
-import sleep from 'sleep';
-
 const POPULATION_SIZE = 20;
 const HALF_POPULATION_SIZE = POPULATION_SIZE / 2;
-const MAX_ITERATIONS = 1000;
+const MAX_ITERATIONS = 500;
 const ACCEPTABLE_SCORE = 0;
 
 export type Organism<DnaType> = {
@@ -33,24 +30,24 @@ export const evolveSolution = <DnaType>({generateRandomOrganism, scoreOrganism, 
     };
     let currentIteration = 0;
 
+    // console.log('going for %o generations..', MAX_ITERATIONS);
     while (!isDoneEvolving(currentIteration, stepValue.currentBestSolution)) {
-        sleep.msleep(5);
         currentIteration++;
+
+        // if (currentIteration % 20 === 0) {
+            // console.log('Generation %o', currentIteration);
+        // }
+
+        // TODO: periodically yield to let the browser repaint
         stepValue = executeStep(scoreOrganism, crossoverDnas, mutateDna, stepValue.nextPopulation);
 
-        if (stepValue.currentBestSolution !== null) {
+        // TODO: re-enable showing this for hello world example
+        if (stepValue.currentBestSolution !== null && currentIteration % 50 === 0) {
             const best: Organism<DnaType> = stepValue.currentBestSolution;
-            clear();
-            console.log('Current best');
-
-            // cheating here. deal with it.
-            const asciiArray: Array<number> = ((best.dna: any): Array<number>);
-            console.log(String.fromCharCode(...asciiArray));
             console.log(best.score);
+            console.log('Total iterations: ' + currentIteration);
         }
     }
-
-    console.log('Total iterations: ' + currentIteration);
 
     return stepValue.currentBestSolution;
 };
