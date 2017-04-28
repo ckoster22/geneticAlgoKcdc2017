@@ -74,10 +74,13 @@ const mutateDna = (dna: Dna): Dna => {
     }
 };
 
+const genCB = () => {};
+
 const args: GAOptions<Dna> = {
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
-    mutateDna
+    mutateDna,
+    genCB
 };
 evolveSolution(args);
