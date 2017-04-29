@@ -16,12 +16,15 @@ type Dna = Array<Circle>;
 
 const WIDTH: number = 640;
 const HEIGHT: number = 480;
-let RADIUS: number = 200;
 const CROSSOVER_RATE: number = 0.3;
 const MUTATION_RATE: number = 0.03;
-let NEW_CIRCLE_THRESHOLD = 0.99;
+
+let NEW_CIRCLE_THRESHOLD: number = 0.99;
+let RADIUS: number = 200;
 
 let generation: number = 0;
+let images: any = [];
+let currentImageIndex = 0;
 
 // frown at any type.. TODO fix if time
 let gaCanvas: any;
@@ -207,14 +210,45 @@ const mutateValue = (current: number, min: number, max: number): number => {
 const genCB = () => {
     generation++;
 
-    if (generation % 100 === 0) {
+    if (generation % 1000 === 0) {
         NEW_CIRCLE_THRESHOLD *= 0.995;
         console.log('more likely circles %o', NEW_CIRCLE_THRESHOLD);
     }
 
-    if (generation % 35 === 0) {
-        RADIUS *= 0.98;
+    if (generation % 120 === 0) {
+        const newRadius = RADIUS * 0.98;
+
+        if (Math.floor(newRadius) === Math.floor(RADIUS)) {
+            RADIUS = Math.max(1, RADIUS - 1);
+        } else {
+            RADIUS = newRadius
+        }
+        // RADIUS *= 0.98;
         console.log('smaller circles %o', RADIUS);
+    }
+
+    if (generation % 5 === 0) {
+        images.push(gaCanvas.toDataURL());
+    }
+}
+
+window.playMoveClick = () => {
+    console.log('playing..');
+    currentImageIndex = 0;
+
+    drawImages();
+};
+
+const drawImages = () => {
+    const img: any = document.querySelector('#imagePlayback');
+    img.src = images[currentImageIndex++];
+
+    if (currentImageIndex < images.length) {
+        setTimeout(function() {
+            drawImages();
+        }, 16);
+    } else {
+        console.log('done');
     }
 }
 
@@ -231,5 +265,8 @@ window.start(function(newValue) {
     if (newValue) {
         gaCanvas = document.querySelector('#gaCanvas');
         evolveSolution(args);
+
+        const img: any = document.querySelector('#imagePlayback');
+        img.src = images[0];
     }
 });

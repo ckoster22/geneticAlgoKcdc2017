@@ -2,7 +2,7 @@
 
 const POPULATION_SIZE = 20;
 const HALF_POPULATION_SIZE = POPULATION_SIZE / 2;
-const MAX_ITERATIONS = 5000; // TODO: pass this in
+const MAX_ITERATIONS = 15000; // TODO: pass this in
 const ACCEPTABLE_SCORE = 0;
 
 export type Organism<DnaType> = {
@@ -23,7 +23,8 @@ export type GAOptions<DnaType> = {
     genCB: () => void
 };
 
-export const evolveSolution = <DnaType>({generateRandomOrganism, scoreOrganism, crossoverDnas, mutateDna, genCB}: GAOptions<DnaType>): MaybeOrganism<DnaType> => {
+export const evolveSolution = <DnaType>(gaOptions: GAOptions<DnaType>): MaybeOrganism<DnaType> => {
+    const {generateRandomOrganism, scoreOrganism, crossoverDnas, mutateDna, genCB} = gaOptions;
     const initialPopulation: Population<DnaType> =  generateInitialPopulation(generateRandomOrganism);
     let stepValue: StepValue<DnaType> = {
         nextPopulation: initialPopulation,

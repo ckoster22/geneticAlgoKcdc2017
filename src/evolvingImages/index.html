@@ -7,7 +7,7 @@
   <body>
     <div>
         <video id="screenshot-stream" autoplay></video>
-        <canvas id="screenshot-canvas"></canvas>
+        <canvas id="screenshot-canvas" style="position: absolute; top: 20px; left: 700px;"></canvas>
         <p>
             <button id="captureButton">Capture / Take Snapshot</button>
             <button id="stopButton">Stop</button>
@@ -15,7 +15,7 @@
     </div>
     <canvas id="gaCanvas" width="640" height="480"></canvas>
     <canvas id="bestSoFarCanvas" width="640" height="480"></canvas>
-    <img src="" id="imagePlayback" />
+    <img src="" id="imagePlayback" style="position:absolute; top: 500px; left: 700px;"/>
     <button id="playMovieButton">Play Movie</button>
 
     <script>
@@ -28,6 +28,7 @@
 
           document.querySelector('#stopButton').addEventListener('click', stop);
           document.querySelector('#captureButton').addEventListener('click', takeSnapshot);
+          document.querySelector('#playMovieButton').addEventListener('click', window.playMoveClick);
           // $('#stopButton').on('click', stop);
           // $('#captureButton').on('click', takeSnapshot);
 
