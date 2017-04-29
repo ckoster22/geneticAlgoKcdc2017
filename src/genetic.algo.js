@@ -2,7 +2,6 @@
 
 const POPULATION_SIZE = 20;
 const HALF_POPULATION_SIZE = POPULATION_SIZE / 2;
-const MAX_ITERATIONS = 15000; // TODO: pass this in
 const ACCEPTABLE_SCORE = 0;
 
 export type Organism<DnaType> = {
@@ -16,15 +15,16 @@ type StepValue<DnaType> = {
     currentBestSolution: MaybeOrganism<DnaType>
 };
 export type GAOptions<DnaType> = {
+    maxIterations: number,
     generateRandomOrganism: () => Organism<DnaType>,
     scoreOrganism: (organism: Organism<DnaType>) => number,
     crossoverDnas: (dna1: DnaType, dna2: DnaType) => DnaType,
     mutateDna: (dna: DnaType) => DnaType,
-    genCB: () => void
+    genCB: (maybeOrganism: MaybeOrganism<DnaType>) => void
 };
 
 export const evolveSolution = <DnaType>(gaOptions: GAOptions<DnaType>): MaybeOrganism<DnaType> => {
-    const {generateRandomOrganism, scoreOrganism, crossoverDnas, mutateDna, genCB} = gaOptions;
+    const {maxIterations, generateRandomOrganism, scoreOrganism, crossoverDnas, mutateDna, genCB} = gaOptions;
     const initialPopulation: Population<DnaType> =  generateInitialPopulation(generateRandomOrganism);
     let stepValue: StepValue<DnaType> = {
         nextPopulation: initialPopulation,
@@ -32,24 +32,12 @@ export const evolveSolution = <DnaType>(gaOptions: GAOptions<DnaType>): MaybeOrg
     };
     let currentIteration = 0;
 
-    // console.log('going for %o generations..', MAX_ITERATIONS);
-    while (!isDoneEvolving(currentIteration, stepValue.currentBestSolution)) {
+    while (!isDoneEvolving(maxIterations, currentIteration, stepValue.currentBestSolution)) {
         currentIteration++;
-        genCB();
 
-        // if (currentIteration % 20 === 0) {
-            // console.log('Generation %o', currentIteration);
-        // }
-
-        // TODO: periodically yield to let the browser repaint
         stepValue = executeStep(scoreOrganism, crossoverDnas, mutateDna, stepValue.nextPopulation);
 
-        // TODO: re-enable showing this for hello world example
-        if (stepValue.currentBestSolution !== null && currentIteration % 50 === 0) {
-            const best: Organism<DnaType> = stepValue.currentBestSolution;
-            console.log(best.score);
-            console.log('Total iterations: ' + currentIteration);
-        }
+        genCB(stepValue.currentBestSolution);
     }
 
     return stepValue.currentBestSolution;
@@ -88,8 +76,8 @@ const generateInitialPopulation = <DnaType>(generateRandomOrganism: () => Organi
     return population;
 };
 
-const isDoneEvolving = <DnaType>(currentIteration: number, currentBestSolution: MaybeOrganism<DnaType>): boolean => {
-    return currentIteration >= MAX_ITERATIONS ||
+const isDoneEvolving = <DnaType>(maxIterations: number, currentIteration: number, currentBestSolution: MaybeOrganism<DnaType>): boolean => {
+    return currentIteration >= maxIterations ||
             (currentBestSolution !== null &&
             currentBestSolution.score <= ACCEPTABLE_SCORE);
 };

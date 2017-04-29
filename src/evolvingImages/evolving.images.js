@@ -103,7 +103,6 @@ const crossoverDnas = (dna1: Dna, dna2: Dna): Dna => {
 
 const mutateDna = (dna: Dna): Dna => {
     if (Math.random() >= NEW_CIRCLE_THRESHOLD) {
-        console.log('generated new circle!');
         const nextDna = dna.slice();
         nextDna.push(getRandomCircle());
 
@@ -207,7 +206,7 @@ const mutateValue = (current: number, min: number, max: number): number => {
     return newVal;
 }
 
-const genCB = () => {
+const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
     generation++;
 
     if (generation % 1000 === 0) {
@@ -253,6 +252,7 @@ const drawImages = () => {
 }
 
 const args: GAOptions<Dna> = {
+    maxIterations: 1000,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,

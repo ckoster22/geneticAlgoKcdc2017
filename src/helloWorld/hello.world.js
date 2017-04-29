@@ -1,7 +1,7 @@
 // @flow
 
 import { evolveSolution } from '../genetic.algo';
-import type { GAOptions, Organism } from '../genetic.algo';
+import type { GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
 
 type Dna = Array<number>;
 
@@ -74,13 +74,22 @@ const mutateDna = (dna: Dna): Dna => {
     }
 };
 
-const genCB = () => {};
+const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
+    if (maybeOrganism) {
+        console.log(String.fromCharCode(...maybeOrganism.dna));
+    }
+};
 
 const args: GAOptions<Dna> = {
+    maxIterations: 1000,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
     mutateDna,
     genCB
 };
-evolveSolution(args);
+
+const maybeSolution = evolveSolution(args);
+if (maybeSolution) {
+    console.log('Solution: ' + String.fromCharCode(...maybeSolution.dna));
+}
