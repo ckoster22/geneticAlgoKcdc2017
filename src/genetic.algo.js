@@ -2,13 +2,14 @@
 
 const POPULATION_SIZE = 20;
 const HALF_POPULATION_SIZE = POPULATION_SIZE / 2;
-const ACCEPTABLE_SCORE = 0;
+const ACCEPTABLE_SCORE = 0; // TODO: use this? pass it in?
 
+type MaybeScore = number | null;
 export type Organism<DnaType> = {
     dna: DnaType,
-    score: number
+    score: MaybeScore
 };
-type MaybeOrganism<DnaType> = Organism<DnaType> | null;
+export type MaybeOrganism<DnaType> = Organism<DnaType> | null;
 type Population<DnaType> = Array<Organism<DnaType>>;
 type StepValue<DnaType> = {
     nextPopulation: Population<DnaType>,
@@ -45,15 +46,19 @@ export const evolveSolution = <DnaType>(gaOptions: GAOptions<DnaType>): MaybeOrg
 
 const executeStep = <DnaType>(scoreOrganism: (organism: Organism<DnaType>) => number, crossoverDnas: (dna1: DnaType, dna2: DnaType) => DnaType, mutateDna: (dna: DnaType) => DnaType, population: Population<DnaType>): StepValue<DnaType> => {
     const scoredPopulation: Population<DnaType> = population.map((organism: Organism<DnaType>) => {
-        return {
-            ...organism,
-            score: scoreOrganism(organism)
-        };
+        if (organism.score !== null) {
+            return organism;
+        } else {
+            return {
+                ...organism,
+                score: scoreOrganism(organism)
+            };
+        }
     });
     const bestSolution: MaybeOrganism<DnaType> = scoredPopulation.reduce((bestOrganism: MaybeOrganism<DnaType>, organism: Organism<DnaType>) => {
         if (bestOrganism === null) {
             return organism;
-        } else if (bestOrganism.score > organism.score) {
+        } else if (bestOrganism.score !== null && organism.score !== null && bestOrganism.score > organism.score) {
             return organism;
         } else {
             return bestOrganism;
@@ -79,13 +84,18 @@ const generateInitialPopulation = <DnaType>(generateRandomOrganism: () => Organi
 const isDoneEvolving = <DnaType>(maxIterations: number, currentIteration: number, currentBestSolution: MaybeOrganism<DnaType>): boolean => {
     return currentIteration >= maxIterations ||
             (currentBestSolution !== null &&
+            currentBestSolution.score !== null &&
             currentBestSolution.score <= ACCEPTABLE_SCORE);
 };
 
 const generateNextGeneration = <DnaType>(crossoverDnas: (dna1: DnaType, dna2: DnaType) => DnaType, mutateDna: (dna: DnaType) => DnaType, population: Population<DnaType>): Population<DnaType> => {
     const bestHalfOfPopulation: Population<DnaType> = population.slice(0)
         .sort((organism1: Organism<DnaType>, organism2: Organism<DnaType>) => {
-            return organism2.score - organism1.score;
+            if (organism1.score !== null && organism2.score !== null) {
+                return organism2.score - organism1.score;
+            } else {
+                return 0;
+            }
         })
         .filter((organism: Organism<DnaType>, index: number) => {
             return index >= HALF_POPULATION_SIZE;
@@ -101,7 +111,7 @@ const generateNextGeneration = <DnaType>(crossoverDnas: (dna1: DnaType, dna2: Dn
         nextPopulation.push(createOrganismFromDna(mutateDna(crossoverDnas(parent1.dna, parent2.dna))));
 
         // Keep the best parent from the pair so we never get worse
-        if (parent1.score < parent2.score) {
+        if (parent1.score !== null && parent2.score !== null && parent1.score < parent2.score) {
             nextPopulation.push(parent1);
         } else {
             nextPopulation.push(parent2);
@@ -114,6 +124,6 @@ const generateNextGeneration = <DnaType>(crossoverDnas: (dna1: DnaType, dna2: Dn
 const createOrganismFromDna = <DnaType>(dna: DnaType): Organism<DnaType> => {
     return {
         dna,
-        score: Number.MAX_SAFE_INTEGER
+        score: null
     };
 };

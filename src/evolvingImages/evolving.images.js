@@ -1,7 +1,7 @@
 // @flow
 
 import { evolveSolution } from '../genetic.algo';
-import type { GAOptions, Organism } from '../genetic.algo';
+import type { GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
 
 type Circle = {
     x: number,
@@ -39,7 +39,7 @@ const generateRandomOrganism = (): Organism<Dna> => {
 
     return {
         dna: randDna,
-        score: Number.MAX_SAFE_INTEGER
+        score: null
     };
 };
 const getRandomCircle = (): Circle => {
@@ -64,6 +64,10 @@ const scoreOrganism = (organism: Organism<Dna>): number => {
     let blue: number;
     let alpha: number;
     let original = imageData.data;
+    let originalRed;
+    let originalGreen;
+    let originalBlue;
+    let originalAlpha;
     let cost: number = 0;
 
     for (let i = 0, n = pix.length; i < n; i += 4) {
@@ -71,11 +75,15 @@ const scoreOrganism = (organism: Organism<Dna>): number => {
         green = pix[i+1];
         blue = pix[i+2];
         alpha = pix[i+3];
+        originalRed = original[i];
+        originalGreen = original[i+1];
+        originalBlue = original[i+2];
+        originalAlpha = original[i+3];
 
-        cost += Math.abs(red - original[i]);
-        cost += Math.abs(green - original[i+1]);
-        cost += Math.abs(blue - original[i+2]);
-        cost += Math.abs(alpha - original[i+3]);
+        cost += red > originalRed ? red - originalRed : originalRed - red;
+        cost += green > originalGreen ? green - originalGreen : originalGreen - green;
+        cost += blue > originalBlue ? blue - originalBlue : originalBlue - blue;
+        cost += alpha > originalAlpha ? alpha - originalAlpha : originalAlpha - alpha;
     }
 
     return cost;
@@ -134,43 +142,36 @@ const mutateCircle = (currentCircle: Circle): Circle => {
 
     switch (randAttr) {
         case 0:
-            // currentCircle.x = mutateValue(currentCircle.x, lowerX, upperX);
             nextCircle = Object.assign({}, currentCircle, {
                 x: mutateValue(currentCircle.x, lowerX, upperX)
             })
             break;
         case 1:
-            // currentCircle.y = mutateValue(currentCircle.y, lowerY, upperY);
             nextCircle = Object.assign({}, currentCircle, {
                 y: mutateValue(currentCircle.y, lowerY, upperY)
             })
             break;
         case 2:
-            // currentCircle.radius = mutateValue(currentCircle.radius, lowerRadius, upperRadius);
             nextCircle = Object.assign({}, currentCircle, {
                 radius: mutateValue(currentCircle.radius, lowerRadius, upperRadius)
             })
             break;
         case 3:
-            // currentCircle.red = Math.round(mutateValue(currentCircle.red, lowerRed, upperRed));
             nextCircle = Object.assign({}, currentCircle, {
                 red: Math.round(mutateValue(currentCircle.red, lowerRed, upperRed))
             })
             break;
         case 4:
-            // currentCircle.green = Math.round(mutateValue(currentCircle.green, lowerGreen, upperGreen));
             nextCircle = Object.assign({}, currentCircle, {
                 green: Math.round(mutateValue(currentCircle.green, lowerGreen, upperGreen))
             })
             break;
         case 5:
-            // currentCircle.blue = Math.round(mutateValue(currentCircle.blue, lowerBlue, upperBlue));
             nextCircle = Object.assign({}, currentCircle, {
                 blue: Math.round(mutateValue(currentCircle.blue, lowerBlue, upperBlue))
             })
             break;
         case 6:
-            // currentCircle.alpha = parseFloat(mutateValue(currentCircle.alpha, 0, 1).toFixed(2));
             nextCircle = Object.assign({}, currentCircle, {
                 alpha: parseFloat(mutateValue(currentCircle.alpha, 0, 1).toFixed(2))
             })
@@ -208,10 +209,10 @@ const mutateValue = (current: number, min: number, max: number): number => {
 
 const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
     generation++;
+    console.log(generation);
 
     if (generation % 1000 === 0) {
         NEW_CIRCLE_THRESHOLD *= 0.995;
-        console.log('more likely circles %o', NEW_CIRCLE_THRESHOLD);
     }
 
     if (generation % 120 === 0) {
@@ -222,8 +223,6 @@ const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
         } else {
             RADIUS = newRadius
         }
-        // RADIUS *= 0.98;
-        console.log('smaller circles %o', RADIUS);
     }
 
     if (generation % 5 === 0) {
@@ -252,7 +251,7 @@ const drawImages = () => {
 }
 
 const args: GAOptions<Dna> = {
-    maxIterations: 1000,
+    maxIterations: 500,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,

@@ -20,7 +20,7 @@ const generateRandomOrganism = (): Organism<Dna> => {
 
     return {
         dna: randDna,
-        score: Number.MAX_SAFE_INTEGER
+        score: null
     };
 };
 const getAsciiCodeForRandomCharacter = (): number => {
