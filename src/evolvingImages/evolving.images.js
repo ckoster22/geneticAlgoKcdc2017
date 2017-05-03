@@ -18,6 +18,7 @@ const WIDTH: number = 640;
 const HEIGHT: number = 480;
 const CROSSOVER_RATE: number = 0.3;
 const MUTATION_RATE: number = 0.03;
+let STICK_WITH_IT = 15;
 
 let NEW_CIRCLE_THRESHOLD: number = 0.99;
 let RADIUS: number = 200;
@@ -25,6 +26,8 @@ let RADIUS: number = 200;
 let generation: number = 0;
 let images: any = [];
 let currentImageIndex = 0;
+let numTimesStuck = 0;
+let currentBestScore = -1;
 
 // frown at any type.. TODO fix if time
 let gaCanvas: any;
@@ -142,42 +145,51 @@ const mutateCircle = (currentCircle: Circle): Circle => {
 
     switch (randAttr) {
         case 0:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 x: mutateValue(currentCircle.x, lowerX, upperX)
-            })
+            }
             break;
         case 1:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 y: mutateValue(currentCircle.y, lowerY, upperY)
-            })
+            }
             break;
         case 2:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 radius: mutateValue(currentCircle.radius, lowerRadius, upperRadius)
-            })
+            }
             break;
         case 3:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 red: Math.round(mutateValue(currentCircle.red, lowerRed, upperRed))
-            })
+            }
             break;
         case 4:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 green: Math.round(mutateValue(currentCircle.green, lowerGreen, upperGreen))
-            })
+            }
             break;
         case 5:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 blue: Math.round(mutateValue(currentCircle.blue, lowerBlue, upperBlue))
-            })
+            }
             break;
         case 6:
-            nextCircle = Object.assign({}, currentCircle, {
+            nextCircle = {
+                ...currentCircle,
                 alpha: parseFloat(mutateValue(currentCircle.alpha, 0, 1).toFixed(2))
-            })
+            }
             break;
         default:
-            nextCircle = Object.assign({}, currentCircle);
+            nextCircle = {
+                ...currentCircle
+            }
     }
 
     return nextCircle;
@@ -211,22 +223,38 @@ const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
     generation++;
     console.log(generation);
 
-    if (generation % 1000 === 0) {
-        NEW_CIRCLE_THRESHOLD *= 0.995;
-    }
-
-    if (generation % 120 === 0) {
-        const newRadius = RADIUS * 0.98;
-
-        if (Math.floor(newRadius) === Math.floor(RADIUS)) {
-            RADIUS = Math.max(1, RADIUS - 1);
+    if (maybeOrganism) {
+        if (currentBestScore === maybeOrganism.score) {
+            numTimesStuck++;
         } else {
-            RADIUS = newRadius
+            currentBestScore = maybeOrganism.score;
         }
-    }
 
-    if (generation % 5 === 0) {
-        images.push(gaCanvas.toDataURL());
+        if (RADIUS <= 35) {
+            STICK_WITH_IT = 50;
+        }
+
+        if (numTimesStuck >= STICK_WITH_IT) {
+            NEW_CIRCLE_THRESHOLD *= 0.995;
+            const newRadius = RADIUS * 0.95;
+
+            if (Math.floor(newRadius) === Math.floor(RADIUS)) {
+                RADIUS = Math.max(1, RADIUS - 1);
+            } else {
+                RADIUS = Math.max(newRadius, 1);
+            }
+
+            numTimesStuck = 0;
+        }
+
+        if (generation % 5 === 0) {
+            drawOrganism(maybeOrganism);
+            images.push(gaCanvas.toDataURL());
+        }
+
+        if (generation % 100 === 0 && maybeOrganism.score) {
+            console.log('Score %o - Dna length %o - New circle % %o - Radius %o', maybeOrganism.score, maybeOrganism.dna.length, NEW_CIRCLE_THRESHOLD, RADIUS);
+        }
     }
 }
 
@@ -251,7 +279,7 @@ const drawImages = () => {
 }
 
 const args: GAOptions<Dna> = {
-    maxIterations: 500,
+    maxIterations: 15000,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
