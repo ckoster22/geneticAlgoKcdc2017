@@ -6,65 +6,41 @@
   </head>
   <body>
     <div>
-        <video id="screenshot-stream" autoplay></video>
-        <canvas id="screenshot-canvas" style="position: absolute; top: 20px; left: 700px;"></canvas>
+        <canvas id="screenshot-canvas" width="555" height="465" style="position: absolute; top: 20px; left: 700px;"></canvas>
         <p>
-            <button id="captureButton">Capture / Take Snapshot</button>
-            <button id="stopButton">Stop</button>
+            <button id="startButton">Start</button>
         </p>
     </div>
-    <canvas id="gaCanvas" width="640" height="480"></canvas>
-    <canvas id="bestSoFarCanvas" width="640" height="480"></canvas>
+    <img id="rabbit" width="555" height="465" src="./images/bugsbunny.png">
+    <canvas id="gaCanvas" width="555" height="465"></canvas>
     <img src="" id="imagePlayback" style="position:absolute; top: 500px; left: 700px;"/>
     <button id="playMovieButton">Play Movie</button>
 
     <script>
+        setTimeout(function() {
+            var canvas = document.querySelector('#screenshot-canvas');
+            var ctx = canvas.getContext('2d');
+            var img = document.getElementById('rabbit');
+            ctx.drawImage(img, 0, 0, 555, 465);
+        }, 500);
+
       window.start = function(setImageCb) {
           var canvas = document.querySelector('#screenshot-canvas');
           var ctx = canvas.getContext('2d');
           var localMediaStream;
           var errorCallback;
 
-          document.querySelector('#stopButton').addEventListener('click', stop);
-          document.querySelector('#captureButton').addEventListener('click', takeSnapshot);
+          document.querySelector('#startButton').addEventListener('click', function() {
+              console.log('starting..');
+              canvas.outerHTML = '';
+              delete canvas;
+
+              setTimeout(function() {
+                setImageCb(ctx.getImageData(0, 0, 555, 465));
+              }, 500);
+          });
+
           document.querySelector('#playMovieButton').addEventListener('click', window.playMoveClick);
-
-          function errorCallback(error) {
-              console.log('There was a problem with using your webcam! %o', error);
-          };
-
-          function takeSnapshot() {
-              canvas.width = document.querySelector('#screenshot-stream').videoWidth;
-              canvas.height = document.querySelector('#screenshot-stream').videoHeight;
-              console.log('calling takeSnapshot');
-              if (localMediaStream) {
-                  snapshot();
-              } else {
-                  if (navigator.mediaDevices.getUserMedia) {
-                      navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(function(stream) {
-                          document.querySelector('#screenshot-stream').src = window.URL.createObjectURL(stream);
-                          localMediaStream = window.URL.createObjectURL(stream);
-                      }).catch(errorCallback);
-                  } else if (navigator.webkitGetUserMedia) {
-                      navigator.webkitGetUserMedia({video: true}, function(stream) {
-                          document.querySelector('#screenshot-stream').src = window.URL.createObjectURL(stream);
-                          localMediaStream = stream;
-                      }, errorCallback);
-                  }
-              }
-          };
-
-          function stop() {
-              console.log('calling stop');
-              document.querySelector('#screenshot-stream').pause();
-          };
-
-          function snapshot() {
-              console.log('calling snapshot');
-              ctx.drawImage(document.querySelector('#screenshot-stream'), 0, 0);
-              stop();
-              setImageCb(ctx.getImageData(0, 0, canvas.width, canvas.height));
-          }
       }
     </script>
     <script src="../../build/evolving.images.bundle.js"></script>

@@ -16,16 +16,15 @@ type StepValue<DnaType> = {
     currentBestSolution: MaybeOrganism<DnaType>
 };
 export type GAOptions<DnaType> = {
-    maxIterations: number,
     generateRandomOrganism: () => Organism<DnaType>,
     scoreOrganism: (organism: Organism<DnaType>) => number,
     crossoverDnas: (dna1: DnaType, dna2: DnaType) => DnaType,
     mutateDna: (dna: DnaType) => DnaType,
-    genCB: (maybeOrganism: MaybeOrganism<DnaType>) => void
+    isDoneEvolving: (maybeOrganism: MaybeOrganism<DnaType>, currentIteration: number) => boolean
 };
 
 export const evolveSolution = <DnaType>(gaOptions: GAOptions<DnaType>): MaybeOrganism<DnaType> => {
-    const {maxIterations, generateRandomOrganism, scoreOrganism, crossoverDnas, mutateDna, genCB} = gaOptions;
+    const {generateRandomOrganism, scoreOrganism, crossoverDnas, mutateDna, isDoneEvolving} = gaOptions;
     const initialPopulation: Population<DnaType> =  generateInitialPopulation(generateRandomOrganism);
     let stepValue: StepValue<DnaType> = {
         nextPopulation: initialPopulation,
@@ -33,12 +32,10 @@ export const evolveSolution = <DnaType>(gaOptions: GAOptions<DnaType>): MaybeOrg
     };
     let currentIteration = 0;
 
-    while (!isDoneEvolving(maxIterations, currentIteration, stepValue.currentBestSolution)) {
+    while (!isDoneEvolving(stepValue.currentBestSolution, currentIteration)) {
         currentIteration++;
 
         stepValue = executeStep(scoreOrganism, crossoverDnas, mutateDna, stepValue.nextPopulation);
-
-        genCB(stepValue.currentBestSolution);
     }
 
     return stepValue.currentBestSolution;
@@ -81,12 +78,12 @@ const generateInitialPopulation = <DnaType>(generateRandomOrganism: () => Organi
     return population;
 };
 
-const isDoneEvolving = <DnaType>(maxIterations: number, currentIteration: number, currentBestSolution: MaybeOrganism<DnaType>): boolean => {
-    return currentIteration >= maxIterations ||
-            (currentBestSolution !== null &&
-            currentBestSolution.score !== null &&
-            currentBestSolution.score <= ACCEPTABLE_SCORE);
-};
+// const isDoneEvolving = <DnaType>(maxIterations: number, currentIteration: number, currentBestSolution: MaybeOrganism<DnaType>): boolean => {
+//     return currentIteration >= maxIterations ||
+//             (currentBestSolution !== null &&
+//             currentBestSolution.score !== null &&
+//             currentBestSolution.score <= ACCEPTABLE_SCORE);
+// };
 
 const generateNextGeneration = <DnaType>(crossoverDnas: (dna1: DnaType, dna2: DnaType) => DnaType, mutateDna: (dna: DnaType) => DnaType, population: Population<DnaType>): Population<DnaType> => {
     const bestHalfOfPopulation: Population<DnaType> = population.slice(0)

@@ -5,6 +5,7 @@ import type { GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
 
 type Dna = Array<number>;
 
+const MAX_ITERATIONS = 1000;
 const TARGET_STRING: string = 'Hello World';
 const HELLO_WORLD_ASCII: Array<number> = TARGET_STRING.split('').map((char: string) => {
     return char.charCodeAt(0);
@@ -74,19 +75,23 @@ const mutateDna = (dna: Dna): Dna => {
     }
 };
 
-const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
-    if (maybeOrganism) {
-        console.log(String.fromCharCode(...maybeOrganism.dna));
+const isDoneEvolving = (currentBestOrganism: MaybeOrganism<Dna>, currentIteration: number): boolean => {
+    if (currentBestOrganism) {
+        console.log(String.fromCharCode(...currentBestOrganism.dna));
     }
+
+    return (currentBestOrganism !== null &&
+            currentBestOrganism.score !== null &&
+            currentBestOrganism.score === 0) || 
+            currentIteration >= MAX_ITERATIONS;
 };
 
 const args: GAOptions<Dna> = {
-    maxIterations: 1000,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
     mutateDna,
-    genCB
+    isDoneEvolving
 };
 
 const maybeSolution = evolveSolution(args);

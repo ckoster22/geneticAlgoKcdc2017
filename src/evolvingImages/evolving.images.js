@@ -14,11 +14,12 @@ type Circle = {
 };
 type Dna = Array<Circle>;
 
-const WIDTH: number = 640;
-const HEIGHT: number = 480;
+const WIDTH: number = 555;
+const HEIGHT: number = 465;
 const CROSSOVER_RATE: number = 0.3;
 const MUTATION_RATE: number = 0.03;
-let STICK_WITH_IT = 15;
+let STICK_WITH_IT = 50;
+let TIMES_AT_ONE = 0;
 
 let NEW_CIRCLE_THRESHOLD: number = 0.99;
 let RADIUS: number = 200;
@@ -82,6 +83,10 @@ const scoreOrganism = (organism: Organism<Dna>): number => {
         originalGreen = original[i+1];
         originalBlue = original[i+2];
         originalAlpha = original[i+3];
+
+        if (isNaN(red) || isNaN(green) || isNaN(blue) || isNaN(alpha) || isNaN(originalRed) || isNaN(originalGreen) || isNaN(originalBlue) || isNaN(originalAlpha)) {
+            debugger;
+        }
 
         cost += red > originalRed ? red - originalRed : originalRed - red;
         cost += green > originalGreen ? green - originalGreen : originalGreen - green;
@@ -219,7 +224,7 @@ const mutateValue = (current: number, min: number, max: number): number => {
     return newVal;
 }
 
-const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
+const isDoneEvolving = (maybeOrganism: MaybeOrganism<Dna>, currentIteration: number) => {
     generation++;
     console.log(generation);
 
@@ -231,7 +236,7 @@ const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
         }
 
         if (RADIUS <= 35) {
-            STICK_WITH_IT = 50;
+            STICK_WITH_IT = 100;
         }
 
         if (numTimesStuck >= STICK_WITH_IT) {
@@ -256,6 +261,12 @@ const genCB = (maybeOrganism: MaybeOrganism<Dna>) => {
             console.log('Score %o - Dna length %o - New circle % %o - Radius %o', maybeOrganism.score, maybeOrganism.dna.length, NEW_CIRCLE_THRESHOLD, RADIUS);
         }
     }
+
+    if (RADIUS === 1) {
+        TIMES_AT_ONE++;
+    }
+
+    return RADIUS === 1 && TIMES_AT_ONE >= 500;
 }
 
 window.playMoveClick = () => {
@@ -279,12 +290,12 @@ const drawImages = () => {
 }
 
 const args: GAOptions<Dna> = {
-    maxIterations: 15000,
+    // maxIterations: 15000,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
     mutateDna,
-    genCB
+    isDoneEvolving
 };
 
 window.start(function(newValue) {
