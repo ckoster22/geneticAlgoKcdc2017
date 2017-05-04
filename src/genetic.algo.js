@@ -78,13 +78,6 @@ const generateInitialPopulation = <DnaType>(generateRandomOrganism: () => Organi
     return population;
 };
 
-// const isDoneEvolving = <DnaType>(maxIterations: number, currentIteration: number, currentBestSolution: MaybeOrganism<DnaType>): boolean => {
-//     return currentIteration >= maxIterations ||
-//             (currentBestSolution !== null &&
-//             currentBestSolution.score !== null &&
-//             currentBestSolution.score <= ACCEPTABLE_SCORE);
-// };
-
 const generateNextGeneration = <DnaType>(crossoverDnas: (dna1: DnaType, dna2: DnaType) => DnaType, mutateDna: (dna: DnaType) => DnaType, population: Population<DnaType>): Population<DnaType> => {
     const bestHalfOfPopulation: Population<DnaType> = population.slice(0)
         .sort((organism1: Organism<DnaType>, organism2: Organism<DnaType>) => {
@@ -93,10 +86,7 @@ const generateNextGeneration = <DnaType>(crossoverDnas: (dna1: DnaType, dna2: Dn
             } else {
                 return 0;
             }
-        })
-        .filter((organism: Organism<DnaType>, index: number) => {
-            return index >= HALF_POPULATION_SIZE;
-        });
+        }).slice(HALF_POPULATION_SIZE);
 
     const nextPopulation: Population<DnaType> = [];
     for (var i = 0; i < HALF_POPULATION_SIZE; i += 2) {

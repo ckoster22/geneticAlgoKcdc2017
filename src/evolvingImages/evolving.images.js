@@ -290,7 +290,6 @@ const drawImages = () => {
 }
 
 const args: GAOptions<Dna> = {
-    // maxIterations: 15000,
     generateRandomOrganism,
     scoreOrganism,
     crossoverDnas,
