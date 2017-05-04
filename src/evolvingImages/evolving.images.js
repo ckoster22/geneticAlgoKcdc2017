@@ -84,10 +84,6 @@ const scoreOrganism = (organism: Organism<Dna>): number => {
         originalBlue = original[i+2];
         originalAlpha = original[i+3];
 
-        if (isNaN(red) || isNaN(green) || isNaN(blue) || isNaN(alpha) || isNaN(originalRed) || isNaN(originalGreen) || isNaN(originalBlue) || isNaN(originalAlpha)) {
-            debugger;
-        }
-
         cost += red > originalRed ? red - originalRed : originalRed - red;
         cost += green > originalGreen ? green - originalGreen : originalGreen - green;
         cost += blue > originalBlue ? blue - originalBlue : originalBlue - blue;
