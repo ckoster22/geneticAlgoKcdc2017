@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "http-server": "^0.9.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "sleep": "^5.1.1"
   }
 }

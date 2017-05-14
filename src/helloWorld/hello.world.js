@@ -2,11 +2,14 @@
 
 import { evolveSolution } from '../genetic.algo';
 import type { GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
+import sleep from 'sleep';
 
 type Dna = Array<number>;
 
-const MAX_ITERATIONS = 1000;
-const TARGET_STRING: string = 'Hello World';
+let generations = 0;
+
+const MAX_ITERATIONS = 50000;
+const TARGET_STRING: string = 'Hello world';
 const HELLO_WORLD_ASCII: Array<number> = TARGET_STRING.split('').map((char: string) => {
     return char.charCodeAt(0);
 });
@@ -63,19 +66,31 @@ const mutateDna = (dna: Dna): Dna => {
     const randomIndex: number = Math.floor(Math.random() * TARGET_STRING.length);
     const randomAsciiCode: number = getAsciiCodeForRandomCharacter();
 
-    if (randomIndex === TARGET_STRING.length - 1) {
-        return dna
-                .slice(0, randomIndex)
-                .concat(randomAsciiCode);
-    } else {
-        return dna
-                .slice(0, randomIndex)
-                .concat(randomAsciiCode)
-                .concat(dna.slice(randomIndex + 1));
+    let randIndices: Array<number> = []
+    for (let i = 0; i < determineNumCharactersToMutate(TARGET_STRING); ++i) {
+        randIndices.push(Math.floor(Math.random() * TARGET_STRING.length));
     }
+
+    return randIndices.reduce((nextDna, index) => {
+        const randomAsciiCode: number = getAsciiCodeForRandomCharacter();
+        return nextDna
+                .slice(0, index)
+                .concat(randomAsciiCode)
+                .concat(nextDna.slice(index + 1));
+    }, dna);
+};
+
+const determineNumCharactersToMutate = (targetStr: string) : number => {
+    const numToMutate = Math.floor(targetStr.length * 0.1);
+
+    return numToMutate > 0 ? numToMutate : 1;
 };
 
 const isDoneEvolving = (currentBestOrganism: MaybeOrganism<Dna>, currentIteration: number): boolean => {
+    sleep.msleep(5);
+
+    generations++;
+
     if (currentBestOrganism) {
         console.log(String.fromCharCode(...currentBestOrganism.dna));
     }
@@ -96,5 +111,5 @@ const args: GAOptions<Dna> = {
 
 const maybeSolution = evolveSolution(args);
 if (maybeSolution) {
-    console.log('Solution: ' + String.fromCharCode(...maybeSolution.dna));
+    console.log('Best solution found after ' + generations + ' generations: ' + String.fromCharCode(...maybeSolution.dna));
 }
