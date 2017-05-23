@@ -1,4 +1,0 @@
-{
-  "presets": ["flow", "es2015", "es2016"],
-  "plugins": ["transform-object-rest-spread"]
-}

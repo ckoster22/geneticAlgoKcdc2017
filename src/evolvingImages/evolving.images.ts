@@ -1,7 +1,4 @@
-// @flow
-
-import { evolveSolution } from '../genetic.algo';
-import type { GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
+import { evolveSolution, GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
 
 type Circle = {
     x: number,
@@ -227,7 +224,7 @@ const isDoneEvolving = (maybeOrganism: MaybeOrganism<Dna>, currentIteration: num
     if (maybeOrganism) {
         if (currentBestScore === maybeOrganism.score) {
             numTimesStuck++;
-        } else {
+        } else if (maybeOrganism.score !== null) {
             currentBestScore = maybeOrganism.score;
         }
 
@@ -265,7 +262,7 @@ const isDoneEvolving = (maybeOrganism: MaybeOrganism<Dna>, currentIteration: num
     return RADIUS === 1 && TIMES_AT_ONE >= 500;
 }
 
-window.playMoveClick = () => {
+(window as any).playMoveClick = () => {
     console.log('playing..');
     currentImageIndex = 0;
 
@@ -293,7 +290,7 @@ const args: GAOptions<Dna> = {
     isDoneEvolving
 };
 
-window.start(function(newValue) {
+(window as any).start(function(newValue: any) {
     imageData = newValue;
     if (newValue) {
         gaCanvas = document.querySelector('#gaCanvas');

@@ -1,5 +1,3 @@
-// @flow
-
 const POPULATION_SIZE = 20;
 const HALF_POPULATION_SIZE = POPULATION_SIZE / 2;
 const ACCEPTABLE_SCORE = 0; // TODO: use this? pass it in?

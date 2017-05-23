@@ -1,21 +1,17 @@
 {
   "name": "geneticalgokcdc2017",
   "scripts": {
-    "build": "babel src/ -d build/",
-    "hello": "npm run build && node build/helloWorld/hello.world.js",
-    "image": "npm run build && ./node_modules/.bin/webpack && ./node_modules/.bin/http-server"
+    "clean": "rm -rf ./build",
+    "hello": "tsc && node ./build/helloWorld/hello.world.js",
+    "image": "./node_modules/.bin/webpack && ./node_modules/.bin/http-server"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-loader": "^6.2.2",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2016": "^6.24.1",
-    "babel-preset-flow": "^6.23.0",
-    "flow-bin": "^0.44.0",
+    "awesome-typescript-loader": "^3.1.3",
+    "typescript": "^2.3.3",
     "webpack": "^2.4.1"
   },
   "dependencies": {
+    "@types/sleep": "0.0.6",
     "http-server": "^0.9.0",
     "path": "^0.12.7",
     "sleep": "^5.1.1"

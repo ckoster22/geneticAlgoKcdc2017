@@ -1,8 +1,5 @@
-// @flow
-
-import { evolveSolution } from '../genetic.algo';
-import type { GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
-import sleep from 'sleep';
+import { evolveSolution, GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
+import * as sleep from 'sleep';
 
 type Dna = Array<number>;
 
