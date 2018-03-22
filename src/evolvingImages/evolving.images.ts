@@ -1,25 +1,23 @@
 import { evolveSolution, GAOptions, Organism, MaybeOrganism } from '../genetic.algo';
 
-type Circle = {
-    x: number,
-    y: number,
-    radius: number,
+type Line = {
+    x1: number,
+    x2: number,
+    y1: number,
+    y2: number,
     red: number,
     green: number,
     blue: number,
     alpha: number,
 };
-type Dna = Array<Circle>;
+type Dna = Array<Line>;
 
 const WIDTH: number = 555;
 const HEIGHT: number = 465;
 const CROSSOVER_RATE: number = 0.3;
 const MUTATION_RATE: number = 0.03;
-let STICK_WITH_IT = 50;
-let TIMES_AT_ONE = 0;
 
-let NEW_CIRCLE_THRESHOLD: number = 0.99;
-let RADIUS: number = 200;
+let NEW_LINE_THRESHOLD: number = 0.9;
 
 let generation: number = 0;
 let images: any = [];
@@ -35,7 +33,7 @@ const generateRandomOrganism = (): Organism<Dna> => {
     const randDna: Dna = [];
 
     for (let i = 0; i < 5; ++i) {
-        randDna.push(getRandomCircle());
+        randDna.push(getRandomLine());
     }
 
     return {
@@ -43,11 +41,12 @@ const generateRandomOrganism = (): Organism<Dna> => {
         score: null
     };
 };
-const getRandomCircle = (): Circle => {
+const getRandomLine = (): Line => {
     return {
-        x: Math.floor(Math.random() * WIDTH),
-        y: Math.floor(Math.random() * HEIGHT),
-        radius: Math.floor(RADIUS),
+        x1: Math.floor(Math.random() * WIDTH),
+        x2: Math.floor(Math.random() * WIDTH),
+        y1: Math.floor(Math.random() * HEIGHT),
+        y2: Math.floor(Math.random() * HEIGHT),
         red: Math.floor(Math.random() * 255),
         green: Math.floor(Math.random() * 255),
         blue: Math.floor(Math.random() * 255),
@@ -73,13 +72,13 @@ const scoreOrganism = (organism: Organism<Dna>): number => {
 
     for (let i = 0, n = pix.length; i < n; i += 4) {
         red = pix[i];
-        green = pix[i+1];
-        blue = pix[i+2];
-        alpha = pix[i+3];
+        green = pix[i + 1];
+        blue = pix[i + 2];
+        alpha = pix[i + 3];
         originalRed = original[i];
-        originalGreen = original[i+1];
-        originalBlue = original[i+2];
-        originalAlpha = original[i+3];
+        originalGreen = original[i + 1];
+        originalBlue = original[i + 2];
+        originalAlpha = original[i + 3];
 
         cost += red > originalRed ? red - originalRed : originalRed - red;
         cost += green > originalGreen ? green - originalGreen : originalGreen - green;
@@ -95,102 +94,112 @@ const drawOrganism = (organism: Organism<Dna>): void => {
     context.clearRect(0, 0, WIDTH, HEIGHT);
 
     for (let i = 0; i < organism.dna.length; ++i) {
-        let circle: Circle = organism.dna[i];
+        let line: Line = organism.dna[i];
         context.beginPath();
-        context.arc(circle.x, circle.y, circle.radius, 0, 2 * Math.PI, false);
-        context.fillStyle = 'rgba(' + circle.red + ', ' + circle.green + ', ' + circle.blue + ', ' + circle.alpha + ')';
-        context.fill();
+        context.moveTo(line.x1, line.y1);
+        context.lineTo(line.x2, line.y2);
+        context.strokeStyle = 'rgba(' + line.red + ', ' + line.green + ', ' + line.blue + ', ' + line.alpha + ')';
+        context.lineWidth = 10;
+        context.stroke();
     }
 }
 
 const crossoverDnas = (dna1: Dna, dna2: Dna): Dna => {
-    let childCircles = dna1.slice(0, Math.floor(CROSSOVER_RATE * dna1.length));
-    childCircles = childCircles.concat(dna2.slice(Math.floor(CROSSOVER_RATE * dna2.length)));
+    let childLines = dna1.slice(0, Math.floor(CROSSOVER_RATE * dna1.length));
+    childLines = childLines.concat(dna2.slice(Math.floor(CROSSOVER_RATE * dna2.length)));
 
-    return childCircles;
+    return childLines;
 };
 
 const mutateDna = (dna: Dna): Dna => {
-    if (Math.random() >= NEW_CIRCLE_THRESHOLD) {
+    if (Math.random() >= NEW_LINE_THRESHOLD) {
         const nextDna = dna.slice();
-        nextDna.push(getRandomCircle());
+        nextDna.push(getRandomLine());
 
         return nextDna;
     } else {
         const randIndex: number = Math.floor(Math.random() * dna.length);
-        const currentCircle: Circle = dna[randIndex];
+        const currentLine: Line = dna[randIndex];
 
-        const nextCircle = mutateCircle(currentCircle);
-        return [...dna.slice(0, randIndex), nextCircle, ...dna.slice(randIndex+1)];
+        const nextLine = mutateLine(currentLine);
+        return [...dna.slice(0, randIndex), nextLine, ...dna.slice(randIndex + 1)];
     }
 }
 
-const mutateCircle = (currentCircle: Circle): Circle => {
-    const randAttr: number = Math.floor(Math.random() * 7);
-    const lowerX: number = Math.max(0, currentCircle.x - currentCircle.x * MUTATION_RATE);
-    const upperX: number = Math.min(WIDTH, currentCircle.x + currentCircle.x * MUTATION_RATE);
-    const lowerY: number = Math.max(0, currentCircle.y - currentCircle.y * MUTATION_RATE);
-    const upperY: number = Math.min(HEIGHT, currentCircle.y + currentCircle.y * MUTATION_RATE);
-    const lowerRadius: number = Math.max(0, currentCircle.radius - currentCircle.radius * MUTATION_RATE);
-    const upperRadius: number = Math.min(300, currentCircle.radius + currentCircle.radius * MUTATION_RATE);
-    const lowerRed: number = Math.max(0, currentCircle.red - currentCircle.red * MUTATION_RATE);
-    const upperRed: number = Math.min(255, currentCircle.red + currentCircle.red * MUTATION_RATE);
-    const lowerGreen: number = Math.max(0, currentCircle.green - currentCircle.green * MUTATION_RATE);
-    const upperGreen: number = Math.min(255, currentCircle.green + currentCircle.green * MUTATION_RATE);
-    const lowerBlue: number = Math.max(0, currentCircle.blue - currentCircle.blue * MUTATION_RATE);
-    const upperBlue: number = Math.min(255, currentCircle.blue + currentCircle.blue * MUTATION_RATE);
-    let nextCircle;
+const mutateLine = (currentLine: Line): Line => {
+    const randAttr: number = Math.floor(Math.random() * 8);
+    const lowerX1: number = Math.max(0, currentLine.x1 - currentLine.x1 * MUTATION_RATE);
+    const upperX1: number = Math.min(WIDTH, currentLine.x1 + currentLine.x1 * MUTATION_RATE);
+    const lowerX2: number = Math.max(0, currentLine.x2 - currentLine.x2 * MUTATION_RATE);
+    const upperX2: number = Math.min(WIDTH, currentLine.x2 + currentLine.x2 * MUTATION_RATE);
+    const lowerY1: number = Math.max(0, currentLine.y1 - currentLine.y1 * MUTATION_RATE);
+    const upperY1: number = Math.min(HEIGHT, currentLine.y1 + currentLine.y1 * MUTATION_RATE);
+    const lowerY2: number = Math.max(0, currentLine.y2 - currentLine.y2 * MUTATION_RATE);
+    const upperY2: number = Math.min(HEIGHT, currentLine.y2 + currentLine.y2 * MUTATION_RATE);
+    const lowerRed: number = Math.max(0, currentLine.red - currentLine.red * MUTATION_RATE);
+    const upperRed: number = Math.min(255, currentLine.red + currentLine.red * MUTATION_RATE);
+    const lowerGreen: number = Math.max(0, currentLine.green - currentLine.green * MUTATION_RATE);
+    const upperGreen: number = Math.min(255, currentLine.green + currentLine.green * MUTATION_RATE);
+    const lowerBlue: number = Math.max(0, currentLine.blue - currentLine.blue * MUTATION_RATE);
+    const upperBlue: number = Math.min(255, currentLine.blue + currentLine.blue * MUTATION_RATE);
+    let nextLine;
 
     switch (randAttr) {
         case 0:
-            nextCircle = {
-                ...currentCircle,
-                x: mutateValue(currentCircle.x, lowerX, upperX)
+            nextLine = {
+                ...currentLine,
+                x1: mutateValue(currentLine.x1, lowerX1, upperX1)
             }
             break;
         case 1:
-            nextCircle = {
-                ...currentCircle,
-                y: mutateValue(currentCircle.y, lowerY, upperY)
+            nextLine = {
+                ...currentLine,
+                x2: mutateValue(currentLine.x2, lowerX2, upperX2)
             }
             break;
         case 2:
-            nextCircle = {
-                ...currentCircle,
-                radius: mutateValue(currentCircle.radius, lowerRadius, upperRadius)
+            nextLine = {
+                ...currentLine,
+                y1: mutateValue(currentLine.y1, lowerY1, upperY1)
             }
             break;
         case 3:
-            nextCircle = {
-                ...currentCircle,
-                red: Math.round(mutateValue(currentCircle.red, lowerRed, upperRed))
+            nextLine = {
+                ...currentLine,
+                y2: mutateValue(currentLine.y2, lowerY2, upperY2)
             }
             break;
         case 4:
-            nextCircle = {
-                ...currentCircle,
-                green: Math.round(mutateValue(currentCircle.green, lowerGreen, upperGreen))
+            nextLine = {
+                ...currentLine,
+                red: Math.round(mutateValue(currentLine.red, lowerRed, upperRed))
             }
             break;
         case 5:
-            nextCircle = {
-                ...currentCircle,
-                blue: Math.round(mutateValue(currentCircle.blue, lowerBlue, upperBlue))
+            nextLine = {
+                ...currentLine,
+                green: Math.round(mutateValue(currentLine.green, lowerGreen, upperGreen))
             }
             break;
         case 6:
-            nextCircle = {
-                ...currentCircle,
-                alpha: parseFloat(mutateValue(currentCircle.alpha, 0, 1).toFixed(2))
+            nextLine = {
+                ...currentLine,
+                blue: Math.round(mutateValue(currentLine.blue, lowerBlue, upperBlue))
+            }
+            break;
+        case 7:
+            nextLine = {
+                ...currentLine,
+                alpha: parseFloat(mutateValue(currentLine.alpha, 0, 1).toFixed(2))
             }
             break;
         default:
-            nextCircle = {
-                ...currentCircle
+            nextLine = {
+                ...currentLine
             }
     }
 
-    return nextCircle;
+    return nextLine;
 };
 
 const mutateValue = (current: number, min: number, max: number): number => {
@@ -228,38 +237,17 @@ const isDoneEvolving = (maybeOrganism: MaybeOrganism<Dna>, currentIteration: num
             currentBestScore = maybeOrganism.score;
         }
 
-        if (RADIUS <= 35) {
-            STICK_WITH_IT = 100;
-        }
-
-        if (numTimesStuck >= STICK_WITH_IT) {
-            NEW_CIRCLE_THRESHOLD *= 0.995;
-            const newRadius = RADIUS * 0.95;
-
-            if (Math.floor(newRadius) === Math.floor(RADIUS)) {
-                RADIUS = Math.max(1, RADIUS - 1);
-            } else {
-                RADIUS = Math.max(newRadius, 1);
-            }
-
-            numTimesStuck = 0;
-        }
-
         if (generation % 5 === 0) {
             drawOrganism(maybeOrganism);
             images.push(gaCanvas.toDataURL());
         }
 
-        if (generation % 100 === 0 && maybeOrganism.score) {
-            console.log('Score %o - Dna length %o - New circle % %o - Radius %o', maybeOrganism.score, maybeOrganism.dna.length, NEW_CIRCLE_THRESHOLD, RADIUS);
+        if (generation % 40 === 0 && maybeOrganism.score) {
+            console.log('Score %o - Dna length %o ', maybeOrganism.score, maybeOrganism.dna.length);
         }
     }
 
-    if (RADIUS === 1) {
-        TIMES_AT_ONE++;
-    }
-
-    return RADIUS === 1 && TIMES_AT_ONE >= 500;
+    return generation > 12000;
 }
 
 (window as any).playMoveClick = () => {
@@ -274,7 +262,7 @@ const drawImages = () => {
     img.src = images[currentImageIndex++];
 
     if (currentImageIndex < images.length) {
-        setTimeout(function() {
+        setTimeout(function () {
             drawImages();
         }, 16);
     } else {
@@ -290,7 +278,7 @@ const args: GAOptions<Dna> = {
     isDoneEvolving
 };
 
-(window as any).start(function(newValue: any) {
+(window as any).start(function (newValue: any) {
     imageData = newValue;
     if (newValue) {
         gaCanvas = document.querySelector('#gaCanvas');
